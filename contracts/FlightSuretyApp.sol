@@ -102,11 +102,13 @@ contract FlightSuretyApp {
     */   
     function registerAirline
                             (   
+
                             )
                             external
                             pure
                             returns(bool success, uint256 votes)
     {
+        
         return (success, 0);
     }
 
@@ -116,12 +118,18 @@ contract FlightSuretyApp {
     *
     */  
     function registerFlight
-                                (
-                                )
-                                external
-                                pure
+                            (
+                                address airline, 
+                            )
+                            external
+                            pure
     {
-
+        flight = Flight({
+            isRegistered: true,
+            statusCode: STATUS_CODE_UNKNOWN;
+            updatedTimestamp: block.timestamp,   
+            airline: airline
+        })
     }
     
    /**
