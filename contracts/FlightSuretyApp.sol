@@ -5,7 +5,7 @@ pragma solidity ^0.4.25;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-
+import "./FlightSuretyData.sol";
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
@@ -15,8 +15,9 @@ contract FlightSuretyApp {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-
+    FlightSuretyData flightSuretyData;
     // Flight status codees
+    uint256 private constant FUNDING = 1 ether;
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
     uint8 private constant STATUS_CODE_ON_TIME = 10;
     uint8 private constant STATUS_CODE_LATE_AIRLINE = 20;
@@ -33,7 +34,7 @@ contract FlightSuretyApp {
         address airline;
     }
     mapping(bytes32 => Flight) private flights;
-
+    mapping(bytes32 => address) private passengers;
  
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -50,7 +51,7 @@ contract FlightSuretyApp {
     modifier requireIsOperational() 
     {
          // Modify to call data contract's status
-        require(true, "Contract is currently not operational");  
+        require(flightSuretyData.isOperational();, "Contract is currently not operational");  
         _;  // All modifiers require an "_" which indicates where the function body will be added
     }
 
@@ -63,6 +64,19 @@ contract FlightSuretyApp {
         _;
     }
 
+    modifier fundedEnough()
+    {
+        require(msg.value >= FUNDING, "Not enough fund; funding of 1 ether is required");
+        _;
+    }
+
+    modifier requireAirlineRegistered() {
+        require(airlines[msg.sender].registered == true, "Airline is not registered")
+    }
+
+    modifier requireAirlinePaidFund() {
+        require(airlines[msg.sender].fundPaid == true);
+    }
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -84,11 +98,10 @@ contract FlightSuretyApp {
     /********************************************************************************************/
 
     function isOperational() 
-                            public 
-                            pure 
+                            public view
                             returns(bool) 
     {
-        return true;  // Modify to call data contract's status
+        return flightSuretyData.isOperational();  // Modify to call data contract's status
     }
 
     /********************************************************************************************/
@@ -102,14 +115,17 @@ contract FlightSuretyApp {
     */   
     function registerAirline
                             (   
-
+                                address airline, 
+                                string name
                             )
                             external
-                            pure
-                            returns(bool success, uint256 votes)
+                            requireIsOperational
+                            requireAirlineRegistered
+                            requireAirlinePaidFund                            
     {
         
-        return (success, 0);
+        flightSuretyData.registerAirline(airline, name);
+        //return (success, 0);
     }
 
 
@@ -120,18 +136,20 @@ contract FlightSuretyApp {
     function registerFlight
                             (
                                 address airline, 
+                                string flight,
+                                uint256 timestamp
                             )
                             external
-                            pure
     {
-        flight = Flight({
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        flights[key] = Flight({
             isRegistered: true,
-            statusCode: STATUS_CODE_UNKNOWN;
-            updatedTimestamp: block.timestamp,   
+            statusCode: 0,
+            updatedTimestamp: timestamp,
             airline: airline
-        })
+        });
     }
-    
+
    /**
     * @dev Called after oracle has updated flight status
     *
@@ -144,8 +162,11 @@ contract FlightSuretyApp {
                                     uint8 statusCode
                                 )
                                 internal
-                                pure
     {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        if (statusCode == STATUS_CODE_LATE_AIRLINE || statusCode == STATUS_CODE_LATE_TECHNICAL) {
+            flightSuretyData.creditInsuree(passengers[key]);
+        }
     }
 
 
@@ -177,7 +198,7 @@ contract FlightSuretyApp {
     uint8 private nonce = 0;    
 
     // Fee to be paid when registering oracle
-    uint256 public constant REGISTRATION_FEE = 1 ether;
+    uint256 public constant REGISTRATION_FEE = 0.1 ether;
 
     // Number of oracles that must respond for valid status
     uint256 private constant MIN_RESPONSES = 3;

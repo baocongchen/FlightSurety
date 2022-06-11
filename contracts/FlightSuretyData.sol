@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.25;
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -17,7 +17,10 @@ contract FlightSuretyData {
         bool registered;
         bool fundPaid;
     }
+
     mapping(address => Airline) private airlines;
+    mapping(address => bool) private flights;
+    mapping(address => uint256) private insurance;
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -33,6 +36,11 @@ contract FlightSuretyData {
                                 public 
     {
         contractOwner = msg.sender;
+        airlines[msg.sender] = Airline({
+            brand: 'Alpha Air',
+            registered: true,
+            fundPaid: false
+        });
     }
 
     /********************************************************************************************/
@@ -106,13 +114,16 @@ contract FlightSuretyData {
     */   
     function registerAirline
                             (   
-                                address airline
+                                address airline,
+                                string name
                             )
                             external
-                            pure
     {
-        airlines[msg.sender].registered = true;
-        
+        airlines[airline] = Airline({
+            brand: name,
+            registered: true,
+            fundPaid: false
+        });
     }
 
 
@@ -126,18 +137,19 @@ contract FlightSuretyData {
                             external
                             payable
     {
-
+        insurance[msg.sender] = msg.value;
     }
 
     /**
-     *  @dev Credits payouts to insurees
+     *  @dev Credits payouts to one insuree
     */
-    function creditInsurees
+    function creditInsuree
                                 (
+                                    address passenger
                                 )
                                 external
-                                pure
     {
+        insurance[passenger] = insurance[passenger].mul(1.5);
     }
     
 
@@ -147,10 +159,12 @@ contract FlightSuretyData {
     */
     function pay
                             (
+                                
                             )
                             external
-                            pure
     {
+        (msg.sender).transfer(insurance[msg.sender]);
+        insurance[msg.sender] = 0;
     }
 
    /**
@@ -160,10 +174,12 @@ contract FlightSuretyData {
     */   
     function fund
                             (   
+                                address airline
                             )
                             public
                             payable
     {
+        airlines[airline].fundPaid = true;
     }
 
     function getFlightKey
@@ -187,7 +203,7 @@ contract FlightSuretyData {
                             external 
                             payable 
     {
-        fund();
+        //fund();
     }
 
 
