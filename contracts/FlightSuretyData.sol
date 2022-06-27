@@ -13,9 +13,9 @@ contract FlightSuretyData {
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
     struct Airline {
-        string brand;
         bool registered;
         bool fundPaid;
+        mapping(address => bool) airlinesVoted;
     }
 
     mapping(address => Airline) private airlines;
@@ -24,7 +24,7 @@ contract FlightSuretyData {
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-
+    event FundPaid(address indexed receiver, address indexed sender); 
 
     /**
     * @dev Constructor
@@ -32,15 +32,17 @@ contract FlightSuretyData {
     */
     constructor
                                 (
+                                    address firstAirline
                                 ) 
-                                public 
+                                public payable
     {
+        operational = true;
         contractOwner = msg.sender;
-        airlines[msg.sender] = Airline({
-            brand: 'Alpha Air',
+        airlines[firstAirline] = Airline({
             registered: true,
-            fundPaid: false
+            fundPaid: true
         });
+        address(this).transfer(msg.value);
     }
 
     /********************************************************************************************/
@@ -87,6 +89,45 @@ contract FlightSuretyData {
         return operational;
     }
 
+ /**
+    *    A getter function to obtain airline voting status
+    */
+    function getAirlineVotingStatus
+                        (
+                            address airline,
+                            address airlineToBeVoted
+                        ) 
+                        external view 
+                        returns(bool)
+    {
+        return airlines[airline].airlinesVoted[airlineToBeVoted];
+    }
+
+    /**
+    *    A getter function to obtain airline registration status
+    */
+    function getAirlineRegistrationStatus
+                        (
+                            address airline
+                        ) 
+                        external view
+                        returns(bool)
+    {
+        return airlines[airline].registered;
+    }
+
+    /**
+    *    A getter function to obtain airline funding status
+    */
+    function getAirlineFundingStatus
+                        (
+                            address airline
+                        ) 
+                        external view
+                        returns(bool)
+    {
+        return airlines[airline].fundPaid;
+    }
 
     /**
     * @dev Sets contract operations on/off
@@ -114,13 +155,12 @@ contract FlightSuretyData {
     */   
     function registerAirline
                             (   
-                                address airline,
-                                string name
+                                address airline
                             )
                             external
+                            requireIsOperational
     {
         airlines[airline] = Airline({
-            brand: name,
             registered: true,
             fundPaid: false
         });
@@ -131,25 +171,26 @@ contract FlightSuretyData {
     * @dev Buy insurance for a flight
     *
     */   
-    function buy
-                            (                             
+    function buy(        
+                    uint256 value     
                             )
                             external
-                            payable
+                            requireIsOperational
     {
-        insurance[msg.sender] = msg.value;
+        insurance[msg.sender] = value;
     }
 
     /**
-     *  @dev Credits payouts to one insuree
+     *  @dev Credits payouts to all insuree 
     */
-    function creditInsuree
+    function creditInsurees
                                 (
-                                    address passenger
+                                    address flight
                                 )
                                 external
+                                requireIsOperational
     {
-        insurance[passenger] = insurance[passenger].mul(1.5);
+        insurance[flight] = insurance[flight].mul(3).div(2);
     }
     
 
@@ -157,13 +198,14 @@ contract FlightSuretyData {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay
-                            (
-                                
-                            )
-                            external
+    function pay(
+                    address passenger
+                )
+                    external
+                    payable
+                    requireIsOperational
     {
-        (msg.sender).transfer(insurance[msg.sender]);
+        msg.sender.transfer(insurance[passenger]);
         insurance[msg.sender] = 0;
     }
 
@@ -176,8 +218,7 @@ contract FlightSuretyData {
                             (   
                                 address airline
                             )
-                            public
-                            payable
+                            external
     {
         airlines[airline].fundPaid = true;
     }
@@ -199,13 +240,14 @@ contract FlightSuretyData {
     * @dev Fallback function for funding smart contract.
     *
     */
-    function() 
+    function()
                             external 
-                            payable 
+                            payable             
     {
-        //fund();
+        emit FundPaid(address(this), msg.sender);
     }
 
+   
 
 }
 

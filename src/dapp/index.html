@@ -24,8 +24,63 @@
         <div id="display-wrapper" class="top-20">
         </div>
         <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+            <label class="form">Airline to be registered</label> 
+            <input type="text" id="registered-airline"> 
+            <label class="form">Registrar</label>
+            <input type="text" id="registering-airline"> 
+            <btn class="btn btn-primary" id="register-airline">Register</btn>
         </div>
+        <div class="row top-20">
+            <label class="form">Registration Status</label> 
+            <input type="text" id="registration-status"> 
+            <btn class="btn btn-primary" id="fetch-registration-status">Fetch Registration Status</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Fund Airline</label> 
+            <input type="text" id="airline-to-be-funded"> 
+            <btn class="btn btn-primary" id="fund-airline">Fund Airline</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Funding</label> 
+            <input type="text" id="funded-airline"> 
+            <btn class="btn btn-primary" id="fetch-funding-status">Fetch Funding Status</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Flight Registration</label> 
+            <input type="text" id="flight-airline-address" placeholder="airline address">
+            <input type="text" id="flight-number" placeholder="flight number">
+            <input type="datetime-local" id="flight-timestamp">
+            <btn class="btn btn-primary" id="register-flight">Register Flight</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Insurance Enrollment</label> 
+            <input type="text" id="insurance-purchase-amount" placeholder="purchase amount"> 
+            <input type="text" id="passenger-address" placeholder="passenger address"> 
+            <input type="text" id="flight-insurance-airline-address" placeholder="airline address">
+            <input type="text" id="insurance-flight-id" placeholder="flight number">
+            <input type="datetime-local" id="insurance-flight-timestamp">
+            <btn class="btn btn-primary" id="buy-insurance">Place Order</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Flight Submission</label> 
+            <input type="text" id="submission-airline-address" placeholder="airline address">
+            <input type="text" id="submission-flight-id" placeholder="flight number">
+            <input type="datetime-local" id="submission-flight-timestamp">
+            <btn class="btn btn-primary" id="submit-flight">Submit Flight</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Flight Status</label> 
+            <input type="text" id="status-airline-address" placeholder="airline address">
+            <input type="text" id="status-flight-id" placeholder="flight number">
+            <input type="datetime-local" id="status-flight-timestamp">
+            <btn class="btn btn-primary" id="fetch-flight-status">Fetch Flight Status</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Credit Withdrawal</label> 
+            <input type="text" id="flight-number"> 
+            <btn class="btn btn-primary" id="withdraw-credits">Withdraw</btn>
+        </div>
+        
     </main>
 
 </body>
