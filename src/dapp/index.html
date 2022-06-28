@@ -69,11 +69,18 @@
             <btn class="btn btn-primary" id="submit-flight">Submit Flight</btn>
         </div>
         <div class="row top-20">
+            <label class="form">Flight Registration Status</label> 
+            <input type="text" id="reg-airline-address" placeholder="airline address">
+            <input type="text" id="reg-flight-id" placeholder="flight number">
+            <input type="datetime-local" id="reg-flight-timestamp">
+            <btn class="btn btn-primary" id="get-flight-reg-status">Get Flight Registration Status</btn>
+        </div>
+        <div class="row top-20">
             <label class="form">Flight Status</label> 
             <input type="text" id="status-airline-address" placeholder="airline address">
             <input type="text" id="status-flight-id" placeholder="flight number">
             <input type="datetime-local" id="status-flight-timestamp">
-            <btn class="btn btn-primary" id="fetch-flight-status">Fetch Flight Status</btn>
+            <btn class="btn btn-primary" id="get-flight-status">Get Flight Status from Oracles</btn>
         </div>
         <div class="row top-20">
             <label class="form">Credit Withdrawal</label> 

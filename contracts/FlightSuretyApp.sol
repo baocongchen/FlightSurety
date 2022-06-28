@@ -167,20 +167,7 @@ contract FlightSuretyApp {
         bytes32 key = getFlightKey(airline, flight, timestamp);
         return flights[key].isRegistered;
     }
-
-    function getFlightStatus (
-                                    address airline,
-                                    string flight,
-                                    uint256 timestamp
-                                )
-                            external
-                            view
-                            requireIsOperational
-                            returns(uint256)
-    {
-        bytes32 key = getFlightKey(airline, flight, timestamp);
-        return flights[key].statusCode;
-    }
+      
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -292,7 +279,9 @@ contract FlightSuretyApp {
                             uint256 timestamp                            
                         )
                         external
+                        view
                         requireIsOperational
+                        returns (bool)
     {
         uint256 index = getRandomIndex(msg.sender);
 
@@ -302,9 +291,23 @@ contract FlightSuretyApp {
                                                 requester: msg.sender,
                                                 isOpen: true
                                             });
-
         emit OracleRequest(index, airline, flight, timestamp);
+        return oracleResponses[key].isOpen;
     } 
+
+    function getFlightStatus (
+                                    address airline,
+                                    string flight,
+                                    uint256 timestamp
+                                )
+                            public
+                            view
+                            requireIsOperational
+                            returns(uint256)
+    {  
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        return flights[key].statusCode;
+    }
 
     function buyInsurance(
         address airline, string flight, uint256 timestamp
@@ -320,7 +323,7 @@ contract FlightSuretyApp {
     }
 
 
-    function withdrawCredit(uint256 amount) external payable requireIsOperational {
+    function withdrawCredit() external payable requireIsOperational {
         flightSuretyData.pay(msg.sender);
     }
 // region ORACLE MANAGEMENT
@@ -424,7 +427,11 @@ contract FlightSuretyApp {
         require(oracleResponses[key].isOpen, "Flight or timestamp do not match oracle request");
 
         oracleResponses[key].responses[statusCode].push(msg.sender);
-
+        flights[key] = Flight({
+            isRegistered: true,
+            statusCode: statusCode,
+            airline: airline
+        });
         // Information isn't considered verified until at least MIN_RESPONSES
         // oracles respond with the *** same *** information
         emit OracleReport(airline, flight, timestamp, statusCode);

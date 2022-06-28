@@ -90,10 +90,20 @@ import './flightsurety.css';
             });
         });
 
-        DOM.elid('fetch-flight-status').addEventListener('click', () => {
-            let airline = DOM.elid('status-airline-address').value;
-            let flight = DOM.elid('status-flight-id').value;
-            let timestamp = DOM.elid('status-flight-timestamp').value;
+        DOM.elid('get-flight-reg-status').addEventListener('click', () => {
+            const flight = DOM.elid('reg-flight-id').value;
+            const airline = DOM.elid('reg-airline-address').value;
+            const timestamp = new Date(DOM.elid('reg-flight-timestamp').value);
+            // Write transaction
+            contract.getFlightRegistrationStatus(airline, flight, timestamp, (error, result) => {
+                display('Flight', 'Get Flight Registration', [ { label: 'Is Registered: ', error: error, value: result} ]);
+            });
+        });
+
+        DOM.elid('get-flight-status').addEventListener('click', () => {
+            const airline = DOM.elid('status-airline-address').value;
+            const flight = DOM.elid('status-flight-id').value;
+            const timestamp = new Date(DOM.elid('status-flight-timestamp').value);
 
             contract.getFlightStatus(airline, flight, timestamp, (error, result) => {
                 console.log(error, result);

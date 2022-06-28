@@ -42,7 +42,7 @@ contract('Oracles', async (accounts) => {
     // ARRANGE
     const flight = 'ND1309'; // Course number
     const timestamp = Math.floor(Date.now() / 1000);
-    await flightSuretyApp.registerFlight(flight, timestamp, {from: config.firstAirline});
+    await flightSuretyApp.registerFlight(config.firstAirline, flight, timestamp, {from: config.firstAirline});
     const status = await flightSuretyApp.isFlightRegistered(config.firstAirline, flight, timestamp);
 
     // Submit a request for oracles to get status information for a flight

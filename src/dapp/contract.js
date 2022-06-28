@@ -12,6 +12,7 @@ export default class Contract {
         this.owner = null;
         this.airlines = [];
         this.passengers = [];
+        this.gas = 6721975;
     }
 
     initialize(callback) {
@@ -133,13 +134,33 @@ export default class Contract {
         };
         self.flightSuretyApp.methods
             .fetchFlightStatus(airline, flight, Math.floor(timestamp / 1000))
-            .send({ from: airline}, (error, result) => {
+            .call({ from:self.owner, gas:self.gas }, (error, result) => {
                 if (error) {
                     console.log(error, payload);
                     callback(error, payload);
                 } else {
                     console.log(result);
-                    callback(error, `Flight ${  flight  } is submitted to Oracles`)
+                    callback(error, `Flight ${  flight  } is submitted to Oracles by ${ self.owner }`)
+                }
+            });
+    }
+
+    getFlightRegistrationStatus(airline, flight, timestamp, callback) {
+        const self = this;
+        let payload = {
+            airline: airline,
+            flight: flight,
+            timestamp: Math.floor(timestamp / 1000),
+        };
+        self.flightSuretyApp.methods
+            .isFlightRegistered(airline, flight, Math.floor(timestamp / 1000))
+            .call({ from: self.owner }, (error, result) => {
+                if (error) {
+                    console.log(error, payload);
+                    callback(error, payload);
+                } else {
+                    console.log(result);
+                    callback(error, `Flight ${flight} Registered: ${ result }`)
                 }
             });
     }
@@ -153,13 +174,13 @@ export default class Contract {
         };
         self.flightSuretyApp.methods
             .getFlightStatus(airline, flight, Math.floor(timestamp / 1000))
-            .send({ from: airline}, (error, result) => {
+            .call({ from: self.owner }, (error, result) => {
                 if (error) {
                     console.log(error, payload);
                     callback(error, payload);
                 } else {
                     console.log(result);
-                    callback(error, `Flight Status of ${  flight  }: ${  result  }`)
+                    callback(error, `Flight Status of ${flight} from Oracles: ${ result }`)
                 }
             });
     }
@@ -174,7 +195,7 @@ export default class Contract {
         }
 
         self.flightSuretyApp.methods
-            .withdrawCreditedAmount(payload.amount).send({from:payload.passenger, gas:self.gas}, (error, result) => {
+            .withdrawCredit().send({from:payload.passenger, gas:self.gas}, (error, result) => {
                 callback(error, payload);
         })
     }

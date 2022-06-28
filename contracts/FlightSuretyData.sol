@@ -181,16 +181,15 @@ contract FlightSuretyData {
     }
 
     /**
-     *  @dev Credits payouts to all insuree 
+     *  @dev Credits payouts to an insuree 
     */
-    function creditInsurees
-                                (
-                                    address flight
-                                )
-                                external
-                                requireIsOperational
+    function creditInsurees(
+                                address passenger
+                            )
+                            external
+                            requireIsOperational
     {
-        insurance[flight] = insurance[flight].mul(3).div(2);
+        insurance[passenger] = insurance[passenger].mul(3).div(2);
     }
     
 
